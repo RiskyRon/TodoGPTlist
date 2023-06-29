@@ -6,13 +6,6 @@ info:
 servers:
   - url: http://localhost:5003
 paths:
-  /upload:
-    post:
-      operationId: uploadFiles
-      summary: Upload files from the UPLOAD folder to the scripts list
-      responses:
-        "200":
-          description: OK
   /scripts:
     post:
       operationId: addScript
@@ -74,6 +67,6 @@ components:
       - script_idx
       properties:
         script_idx:
-          type: sting
-          description: The name of the script to delete.
+          type: integer
+          description: The index of the script to delete.
           required: true

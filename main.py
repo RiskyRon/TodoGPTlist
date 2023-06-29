@@ -28,17 +28,6 @@ async def delete_script():
         _SCRIPTS.pop(script_idx)
     return quart.Response(response='OK', status=200)
 
-@app.post("/upload")
-async def upload_files():
-    import os
-    import json
-    UPLOAD_FOLDER = 'UPLOAD'
-    for filename in os.listdir(UPLOAD_FOLDER):
-        with open(os.path.join(UPLOAD_FOLDER, filename), 'r') as file:
-            content = file.read()
-            _SCRIPTS.append(content)
-    return quart.Response(response='OK', status=200)
-
 @app.get("/logo2.png")
 async def plugin_logo():
     filename = 'logo2.png'
