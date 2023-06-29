@@ -1,3 +1,7 @@
+#rons folders
+UPLOAD/
+DOWNLOAD/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
