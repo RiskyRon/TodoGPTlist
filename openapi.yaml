@@ -1,93 +1,72 @@
 openapi: 3.0.1
 info:
-  title: TODO Plugin
-  description: A plugin that allows the user to create and manage a TODO list using ChatGPT. If you do not know the user's username, ask them first before making queries to the plugin. Otherwise, use the username "global".
+  title: Ronscript Plugin
+  description: A plugin that allows the user to create, retrieve, and manage scripts using ChatGPT.
   version: 'v1'
 servers:
   - url: http://localhost:5003
 paths:
-  /todos/{username}:
-    get:
-      operationId: getTodos
-      summary: Get the list of todos
-      parameters:
-      - in: path
-        name: username
-        schema:
-            type: string
+  /scripts:
+    post:
+      operationId: addScript
+      summary: Add a script to the list
+      requestBody:
         required: true
-        description: The name of the user.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addScriptRequest'
+      responses:
+        "200":
+          description: OK
+    get:
+      operationId: getScripts
+      summary: Get the list of scripts
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/getTodosResponse'
-    post:
-      operationId: addTodo
-      summary: Add a todo to the list
-      parameters:
-      - in: path
-        name: username
-        schema:
-            type: string
-        required: true
-        description: The name of the user.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/addTodoRequest'
-      responses:
-        "200":
-          description: OK
+                $ref: '#/components/schemas/getScriptsResponse'
     delete:
-      operationId: deleteTodo
-      summary: Delete a todo from the list
-      parameters:
-      - in: path
-        name: username
-        schema:
-            type: string
-        required: true
-        description: The name of the user.
+      operationId: deleteScript
+      summary: Delete a script from the list
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/deleteTodoRequest'
+              $ref: '#/components/schemas/deleteScriptRequest'
       responses:
         "200":
           description: OK
 
 components:
   schemas:
-    getTodosResponse:
+    addScriptRequest:
+      type: object
+      required:
+      - script
+      properties:
+        script:
+          type: string
+          description: The script to add to the list.
+          required: true
+    getScriptsResponse:
       type: object
       properties:
-        todos:
+        scripts:
           type: array
           items:
             type: string
-          description: The list of todos.
-    addTodoRequest:
+          description: The list of scripts.
+    deleteScriptRequest:
       type: object
       required:
-      - todo
+      - script_idx
       properties:
-        todo:
-          type: string
-          description: The todo to add to the list.
-          required: true
-    deleteTodoRequest:
-      type: object
-      required:
-      - todo_idx
-      properties:
-        todo_idx:
+        script_idx:
           type: integer
-          description: The index of the todo to delete.
+          description: The index of the script to delete.
           required: true

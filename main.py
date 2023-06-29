@@ -6,45 +6,41 @@ from quart import request
 
 app = quart_cors.cors(quart.Quart(__name__), allow_origin="https://chat.openai.com")
 
-# Keep track of todo's. Does not persist if Python session is restarted.
-_TODOS = {}
+# Keep track of scripts. Does not persist if Python session is restarted.
+_SCRIPTS = []
 
-@app.post("/todos/<string:username>")
-async def add_todo(username):
+@app.post("/scripts")
+async def add_script():
     request = await quart.request.get_json(force=True)
-    if username not in _TODOS:
-        _TODOS[username] = []
-    _TODOS[username].append(request["todo"])
+    _SCRIPTS.append(request["script"])
     return quart.Response(response='OK', status=200)
 
-@app.get("/todos/<string:username>")
-async def get_todos(username):
-    return quart.Response(response=json.dumps(_TODOS.get(username, [])), status=200)
+@app.get("/scripts")
+async def get_scripts():
+    return quart.Response(response=json.dumps(_SCRIPTS), status=200)
 
-@app.delete("/todos/<string:username>")
-async def delete_todo(username):
+@app.delete("/scripts")
+async def delete_script():
     request = await quart.request.get_json(force=True)
-    todo_idx = request["todo_idx"]
+    script_idx = request["script_idx"]
     # fail silently, it's a simple plugin
-    if 0 <= todo_idx < len(_TODOS[username]):
-        _TODOS[username].pop(todo_idx)
+    if 0 <= script_idx < len(_SCRIPTS):
+        _SCRIPTS.pop(script_idx)
     return quart.Response(response='OK', status=200)
 
-@app.get("/logo.png")
+@app.get("/logo2.png")
 async def plugin_logo():
-    filename = 'logo.png'
+    filename = 'logo2.png'
     return await quart.send_file(filename, mimetype='image/png')
 
 @app.get("/.well-known/ai-plugin.json")
 async def plugin_manifest():
-    host = request.headers['Host']
     with open("./.well-known/ai-plugin.json") as f:
         text = f.read()
         return quart.Response(text, mimetype="text/json")
 
 @app.get("/openapi.yaml")
 async def openapi_spec():
-    host = request.headers['Host']
     with open("openapi.yaml") as f:
         text = f.read()
         return quart.Response(text, mimetype="text/yaml")
