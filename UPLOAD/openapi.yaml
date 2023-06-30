@@ -9,7 +9,37 @@ paths:
   /upload:
     post:
       operationId: uploadFiles
-      summary: Upload files from the UPLOAD folder to the scripts list
+      summary: Upload files from the UPLOAD folder to the scripts list List the filenames of all uploaded files every time
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filenames:
+                    type: array
+                    items:
+                      type: string
+                  summaries:
+                    type: array
+                    items:
+                      type: string
+  /download:
+    post:
+      operationId: downloadFiles
+      summary: Download scripts from the scripts list to the DOWNLOAD folder
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  description: The filename of the script to download. If not provided, all scripts will be downloaded.
       responses:
         "200":
           description: OK
@@ -48,26 +78,34 @@ paths:
       responses:
         "200":
           description: OK
-
 components:
   schemas:
     addScriptRequest:
       type: object
       required:
       - script
+      - filename
       properties:
         script:
           type: string
-          description: The script to add to the list.
-          required: true
+          description: The content of the script to add to the list.
+        filename:
+          type: string
+          description: The filename of the script to add to the list.
     getScriptsResponse:
       type: object
       properties:
         scripts:
           type: array
           items:
-            type: string
-          description: The list of scripts.
+            type: object
+            properties:
+              filename:
+                type: string
+                description: The filename of the script.
+              content:
+                type: string
+                description: The content of the script.
     deleteScriptRequest:
       type: object
       required:
@@ -76,4 +114,3 @@ components:
         script_idx:
           type: integer
           description: The index of the script to delete.
-          required: true

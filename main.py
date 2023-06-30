@@ -1,5 +1,5 @@
 import json
-
+import os
 import quart
 import quart_cors
 from quart import request
@@ -12,7 +12,7 @@ _SCRIPTS = []
 @app.post("/scripts")
 async def add_script():
     request = await quart.request.get_json(force=True)
-    _SCRIPTS.append(request["script"])
+    _SCRIPTS.append({"filename": request["filename"], "content": request["script"]})
     return quart.Response(response='OK', status=200)
 
 @app.get("/scripts")
@@ -30,21 +30,29 @@ async def delete_script():
 
 @app.post("/upload")
 async def upload_files():
-    import os
-    import json
     UPLOAD_FOLDER = 'UPLOAD'
-    filelist = []
     for filename in os.listdir(UPLOAD_FOLDER):
         try:
             with open(os.path.join(UPLOAD_FOLDER, filename), 'r') as file:
                 content = file.read()
-                _SCRIPTS.append(content)
-                filelist.append(filename)  # Add filename to the list
+                _SCRIPTS.append({"filename": filename, "content": content})
         except UnicodeDecodeError:
             print(f"Could not read file {filename} as text. Skipping.")
-    # Convert the list of filenames to a JSON string
-    filelist_json = json.dumps(filelist)
-    return quart.Response(response=filelist_json, status=200)
+    return quart.Response(response=json.dumps(_SCRIPTS), status=200)
+
+@app.post("/download")
+async def download_files():
+    DOWNLOAD_FOLDER = 'DOWNLOAD'
+    request_data = await quart.request.get_json(force=True)
+    filename = request_data.get("filename")
+    if filename:
+        scripts = [script for script in _SCRIPTS if script["filename"] == filename]
+    else:
+        scripts = _SCRIPTS
+    for script in scripts:
+        with open(os.path.join(DOWNLOAD_FOLDER, script["filename"]), 'w') as file:
+            file.write(script["content"])
+    return quart.Response(response='OK', status=200)
 
 @app.get("/logo2.png")
 async def plugin_logo():
