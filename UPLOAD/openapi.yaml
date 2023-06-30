@@ -1,15 +1,34 @@
 openapi: 3.0.1
 info:
-  title: Ronscript Plugin
-  description: A plugin that allows the user to create, retrieve, and manage scripts using ChatGPT.
+  title: RonCode Plugin
+  description: A plugin that allows the user to create, retrieve, and manage files using ChatGPT.
   version: 'v1'
 servers:
   - url: http://localhost:5003
 paths:
-  /upload:
+  /files:
     post:
-      operationId: uploadFiles
-      summary: Upload files from the UPLOAD folder to the scripts list List the filenames of all uploaded files every time
+      operationId: add_file
+      summary: Add a file to the list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  description: The filename of the file to add to the list.
+                file:
+                  type: string
+                  description: The content of the file to add to the list.
+      responses:
+        "200":
+          description: OK
+    get:
+      operationId: get_files
+      summary: Get the list of files
       responses:
         "200":
           description: OK
@@ -18,18 +37,60 @@ paths:
               schema:
                 type: object
                 properties:
-                  filenames:
+                  files:
                     type: array
                     items:
-                      type: string
-                  summaries:
+                      type: object
+                      properties:
+                        filename:
+                          type: string
+                          description: The filename of the file.
+                        content:
+                          type: string
+                          description: The content of the file.
+    delete:
+      operationId: delete_file
+      summary: Delete a file from the list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_idx:
+                  type: integer
+                  description: The index of the file to delete.
+      responses:
+        "200":
+          description: OK
+  /upload:
+    post:
+      operationId: upload_files
+      summary: Upload files from the UPLOAD folder to the scripts list and list the files
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
                     type: array
                     items:
-                      type: string
+                      type: object
+                      properties:
+                        filename:
+                          type: string
+                          description: The filename of the file.
+                        content:
+                          type: string
+                          description: The content of the file.
   /download:
     post:
-      operationId: downloadFiles
-      summary: Download scripts from the scripts list to the DOWNLOAD folder
+      operationId: download_files
+      summary: Download files from the scripts list to the DOWNLOAD folder
       requestBody:
         required: false
         content:
@@ -39,78 +100,7 @@ paths:
               properties:
                 filename:
                   type: string
-                  description: The filename of the script to download. If not provided, all scripts will be downloaded.
+                  description: The filename of the script to download. If not provided, all files will be downloaded.
       responses:
         "200":
           description: OK
-  /scripts:
-    post:
-      operationId: addScript
-      summary: Add a script to the list
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/addScriptRequest'
-      responses:
-        "200":
-          description: OK
-    get:
-      operationId: getScripts
-      summary: Get the list of scripts
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/getScriptsResponse'
-    delete:
-      operationId: deleteScript
-      summary: Delete a script from the list
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/deleteScriptRequest'
-      responses:
-        "200":
-          description: OK
-components:
-  schemas:
-    addScriptRequest:
-      type: object
-      required:
-      - script
-      - filename
-      properties:
-        script:
-          type: string
-          description: The content of the script to add to the list.
-        filename:
-          type: string
-          description: The filename of the script to add to the list.
-    getScriptsResponse:
-      type: object
-      properties:
-        scripts:
-          type: array
-          items:
-            type: object
-            properties:
-              filename:
-                type: string
-                description: The filename of the script.
-              content:
-                type: string
-                description: The content of the script.
-    deleteScriptRequest:
-      type: object
-      required:
-      - script_idx
-      properties:
-        script_idx:
-          type: integer
-          description: The index of the script to delete.

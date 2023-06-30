@@ -6,39 +6,42 @@ from quart import request
 
 app = quart_cors.cors(quart.Quart(__name__), allow_origin="https://chat.openai.com")
 
-# Keep track of scripts. Does not persist if Python session is restarted.
-_SCRIPTS = []
+# Keep track of files. Does not persist if Python session is restarted.
+_FILES = []
 
-@app.post("/scripts")
-async def add_script():
+@app.post("/files")
+async def add_file():
     request = await quart.request.get_json(force=True)
-    _SCRIPTS.append({"filename": request["filename"], "content": request["script"]})
+    _FILES.append({"filename": request["filename"], "content": request["file"]})
     return quart.Response(response='OK', status=200)
 
-@app.get("/scripts")
-async def get_scripts():
-    return quart.Response(response=json.dumps(_SCRIPTS), status=200)
+@app.get("/files")
+async def get_files():
+    return quart.Response(response=json.dumps(_FILES), status=200)
 
-@app.delete("/scripts")
-async def delete_script():
+@app.delete("/files")
+async def delete_file():
     request = await quart.request.get_json(force=True)
-    script_idx = request["script_idx"]
+    file_idx = request["file_idx"]
     # fail silently, it's a simple plugin
-    if 0 <= script_idx < len(_SCRIPTS):
-        _SCRIPTS.pop(script_idx)
-    return quart.Response(response='OK', status=200)
+    if 0 <= file_idx < len(_FILES):
+        _FILES.pop(file_idx)
+    return quart.Response(response=json.dumps(_FILES), status=200)
 
 @app.post("/upload")
 async def upload_files():
     UPLOAD_FOLDER = 'UPLOAD'
+    filenames = []  # list to store filenames
     for filename in os.listdir(UPLOAD_FOLDER):
         try:
             with open(os.path.join(UPLOAD_FOLDER, filename), 'r') as file:
                 content = file.read()
-                _SCRIPTS.append({"filename": filename, "content": content})
+                _FILES.append({"filename": filename, "content": content})
+                filenames.append(filename)  # add filename to the list
         except UnicodeDecodeError:
             print(f"Could not read file {filename} as text. Skipping.")
-    return quart.Response(response=json.dumps(_SCRIPTS), status=200)
+    return quart.Response(response=json.dumps(filenames), status=200)  # return only filenames
+
 
 @app.post("/download")
 async def download_files():
@@ -46,12 +49,12 @@ async def download_files():
     request_data = await quart.request.get_json(force=True)
     filename = request_data.get("filename")
     if filename:
-        scripts = [script for script in _SCRIPTS if script["filename"] == filename]
+        files = [file for file in _FILES if file["filename"] == filename]
     else:
-        scripts = _SCRIPTS
-    for script in scripts:
-        with open(os.path.join(DOWNLOAD_FOLDER, script["filename"]), 'w') as file:
-            file.write(script["content"])
+        files = _FILES
+    for file in files:
+        with open(os.path.join(DOWNLOAD_FOLDER, file["filename"]), 'w') as file:
+            file.write(file["content"])
     return quart.Response(response='OK', status=200)
 
 @app.get("/logo2.png")
