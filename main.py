@@ -52,9 +52,9 @@ async def download_files():
         files = [file for file in _FILES if file["filename"] == filename]
     else:
         files = _FILES
-    for file in files:
-        with open(os.path.join(DOWNLOAD_FOLDER, file["filename"]), 'w') as file:
-            file.write(file["content"])
+    for file_dict in files:
+        with open(os.path.join(DOWNLOAD_FOLDER, file_dict["filename"]), 'w') as file:
+            file.write(file_dict["content"])
     return quart.Response(response='OK', status=200)
 
 @app.get("/logo2.png")
