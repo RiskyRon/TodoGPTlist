@@ -104,3 +104,60 @@ paths:
       responses:
         "200":
           description: OK
+  /s3/upload:
+  post:
+    operationId: upload_file_to_s3
+    summary: Uploads a file to S3
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+    responses:
+      "200":
+        description: File uploaded successfully
+      "400":
+        description: Error message
+  /s3/{filename}:
+    get:
+      operationId: get_s3_file
+      summary: Retrieves a file from S3
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File content
+        "400":
+          description: Error message
+    delete:
+      operationId: delete_file_from_s3
+      summary: Deletes a file from S3
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File deleted successfully
+        "400":
+          description: Error message
+  /s3:
+    get:
+      operationId: list_files_in_s3
+      summary: Lists all files in S3
+      responses:
+        "200":
+          description: List of files
+        "400":
+          description: Error message
