@@ -26,19 +26,22 @@ async def delete_file():
     # fail silently, it's a simple plugin
     if 0 <= file_idx < len(_FILES):
         _FILES.pop(file_idx)
-    return quart.Response(response='OK', status=200)
+    return quart.Response(response=json.dumps(_FILES), status=200)
 
 @app.post("/upload")
 async def upload_files():
     UPLOAD_FOLDER = 'UPLOAD'
+    filenames = []  # list to store filenames
     for filename in os.listdir(UPLOAD_FOLDER):
         try:
             with open(os.path.join(UPLOAD_FOLDER, filename), 'r') as file:
                 content = file.read()
                 _FILES.append({"filename": filename, "content": content})
+                filenames.append(filename)  # add filename to the list
         except UnicodeDecodeError:
             print(f"Could not read file {filename} as text. Skipping.")
-    return quart.Response(response=json.dumps(_FILES), status=200)
+    return quart.Response(response=json.dumps(filenames), status=200)  # return only filenames
+
 
 @app.post("/download")
 async def download_files():
